@@ -1,0 +1,27 @@
+.traffic-chart {
+	min-height: var(--traffic-chart-height, 220px);
+	padding: 20px 12px 10px;
+	display: flex;
+	align-items: flex-end;
+	gap: clamp(8px, 2vw, 22px);
+	border-bottom: 1px solid #edf0f4;
+}
+
+.traffic-chart-column {
+	height: 100%;
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 7px;
+}
+
+.traffic-chart-bar {
+	width: min(34px, 100%);
+	min-height: 10px;
+	border-radius: 6px 6px 2px 2px;
+	background: linear-gradient(180deg, #78b1fb, #3b72eb);
+}
+
+.traffic-chart-column span { color: #93a0b1; font-size: 9px; }

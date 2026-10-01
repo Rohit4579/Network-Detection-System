@@ -1,0 +1,37 @@
+.security-card {
+	min-width: 0;
+	min-height: 145px;
+	padding: 18px;
+	display: flex;
+	align-items: flex-start;
+	gap: 13px;
+	border: 1px solid #e5eaf1;
+	border-radius: 11px;
+	background: #ffffff;
+	box-shadow: 0 2px 8px rgba(30, 41, 59, 0.025);
+}
+
+.security-card-icon {
+	width: 40px;
+	height: 40px;
+	flex-shrink: 0;
+	display: grid;
+	place-items: center;
+	border-radius: 9px;
+}
+
+.security-card.blue .security-card-icon { color: #2563eb; background: #eaf1ff; }
+.security-card.orange .security-card-icon { color: #ea580c; background: #fff1e8; }
+.security-card.red .security-card-icon { color: #dc2626; background: #ffeded; }
+.security-card.green .security-card-icon { color: #16a34a; background: #e9f9ef; }
+
+.security-card-content {
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
+}
+
+.security-card-content span { color: #8190a5; font-size: 10px; }
+.security-card-content strong { color: #172033; font-size: 25px; line-height: 1; }
+.security-card-content small { color: #94a3b8; font-size: 9px; }

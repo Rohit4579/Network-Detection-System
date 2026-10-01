@@ -1,0 +1,117 @@
+rules_version = '2';
+
+service cloud.firestore {
+    match /databases/{database}/documents {
+        function isSignedIn() {
+            return request.auth != null;
+        }
+
+        function userDocument() {
+            return get(
+                /databases/$(database)/documents/users/$(request.auth.uid)
+            );
+        }
+
+        function isAdmin() {
+            return isSignedIn()
+                && userDocument().data.role == "admin"
+                && userDocument().data.status == "active";
+        }
+
+        function isAnalyst() {
+            return isSignedIn()
+                && userDocument().data.role == "analyst"
+                && userDocument().data.status == "active";
+        }
+
+        function isActiveUser() {
+            return isAdmin() || isAnalyst();
+        }
+
+        match /users/{userId} {
+            allow get: if isSignedIn()
+                && (request.auth.uid == userId || isAdmin());
+            allow list: if isAdmin();
+
+            allow create: if isSignedIn()
+                && request.auth.uid == userId
+                && request.resource.data.uid == request.auth.uid
+                && request.resource.data.role == "analyst"
+                && request.resource.data.status == "active"
+                && request.resource.data.name is string
+                && request.resource.data.email is string;
+
+            allow update: if isAdmin()
+                || (isSignedIn()
+                    && request.auth.uid == userId
+                    && request.resource.data.uid == resource.data.uid
+                    && request.resource.data.email == resource.data.email
+                    && request.resource.data.role == resource.data.role
+                    && request.resource.data.status == resource.data.status
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+                        "name",
+                        "updatedAt"
+                    ]));
+
+            allow delete: if isAdmin();
+        }
+
+        match /securityEvents/{eventId} {
+            allow read: if isActiveUser();
+            allow create: if isActiveUser()
+                && request.resource.data.createdBy == request.auth.uid
+                && request.resource.data.sourceIp is string
+                && request.resource.data.destinationIp is string
+                && request.resource.data.eventType is string
+                && request.resource.data.protocol is string
+                && request.resource.data.severity is string
+                && request.resource.data.status is string;
+            allow update: if isAdmin()
+                || (isActiveUser()
+                    && request.resource.data.createdBy == resource.data.createdBy
+                    && request.resource.data.sourceIp == resource.data.sourceIp
+                    && request.resource.data.destinationIp == resource.data.destinationIp
+                    && request.resource.data.eventType == resource.data.eventType
+                    && request.resource.data.protocol == resource.data.protocol
+                    && request.resource.data.severity == resource.data.severity
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+                        "status",
+                        "updatedAt"
+                    ]));
+            allow delete: if isAdmin();
+        }
+
+        match /alerts/{alertId} {
+            allow read: if isActiveUser();
+            allow create: if isActiveUser();
+            allow update: if isActiveUser();
+            allow delete: if isAdmin();
+        }
+
+        match /detectionRules/{ruleId} {
+            allow read: if isActiveUser();
+            allow create: if isAdmin();
+            allow update: if isAdmin();
+            allow delete: if isAdmin();
+        }
+
+        match /securityLogs/{logId} {
+            allow read: if isActiveUser();
+            allow create: if isActiveUser()
+                && request.resource.data.userId == request.auth.uid;
+            allow update: if isAdmin();
+            allow delete: if isAdmin();
+        }
+
+        match /systemSettings/{settingId} {
+            allow read: if isAdmin();
+            allow create: if isAdmin();
+            allow update: if isAdmin();
+            allow delete: if isAdmin();
+        }
+
+        match /{document=**} {
+            allow read, write: if false;
+        }
+    }
+}
